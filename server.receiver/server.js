@@ -71,11 +71,11 @@ function addBeaconRSSIReadingToDB(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-            db.collection("Beacon_RSSI_Readings").insert(data, function(err, res) {
-                if (err) throw err;
-                console.log("Added 1 object to Beacon_RSSI_Readings collection.");
-                db.close();
-            });
+        db.collection("Beacon_RSSI_Readings").insert(data, function(err, res) {
+            if (err) throw err;
+            console.log("Added 1 object to Beacon_RSSI_Readings collection.");
+            db.close();
+        });
     });
 
 }
@@ -84,10 +84,10 @@ function retrieveFromDBTest(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-            db.collection("Beacon_RSSI_Readings").find().toArray(function(err, docs) {
-                console.log(JSON.stringify(docs));
-                db.close();
-            });
+        db.collection("Beacon_RSSI_Readings").find().toArray(function(err, docs) {
+            console.log(JSON.stringify(docs));
+            db.close();
+        });
     });
 
 }
