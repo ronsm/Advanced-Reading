@@ -1,3 +1,19 @@
+/* 
+ * server.receiver -> server.js
+ * ----------------------------------------------------------------------------------------------------
+ * 
+ * Author: Ronnie Smith <ras35@hw.ac.uk>
+ * Version: 1.0
+ * Date: 14th February 2018
+ * 
+ */
+
+/* 
+ * Defintions and Global Variables
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+// Packages
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
