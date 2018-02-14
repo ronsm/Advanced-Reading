@@ -50,7 +50,7 @@ io.on('connection', function(socket){
 
         if(objectType.toString() == "beacon_rssi"){
             console.log(objectType);
-            //addBeaconRSSIReadingToDB(parsedJSON);
+            addBeaconRSSIReadingToDB(parsedJSON);
             retrieveFromDBTest();
         }
         else{
