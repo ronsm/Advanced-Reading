@@ -2,7 +2,7 @@
   "name": "server.receiver",
   "version": "1.0.0",
   "description": "Receiver component of BLE positioning Server",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "make test"
   },
@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/ronsm/Advanced-Reading/issues"
   },
-  "homepage": "https://github.com/ronsm/Advanced-Reading#readme"
+  "homepage": "https://github.com/ronsm/Advanced-Reading#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "http": "0.0.0",
+    "mongodb": "^2.2.34",
+    "socket.io": "^2.0.4"
+  }
 }
