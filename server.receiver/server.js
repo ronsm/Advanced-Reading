@@ -26,7 +26,7 @@ var db = require('mongodb').Db;
 var con_url = "mongodb://localhost:27017/" + dbName;
 
 /* 
- * Socket.io
+ * Express
  * ----------------------------------------------------------------------------------------------------
  */
 
@@ -34,12 +34,18 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
-io.on('connection', function(socket){
-  console.log('a user connected');
-});
-
 http.listen(3000, function(){
   console.log('listening on *:3000');
+});
+
+/* 
+ * Socket.io
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+
+io.on('connection', function(socket){
+    console.log('a user connected');
 });
 
 io.on('connection', function(socket){

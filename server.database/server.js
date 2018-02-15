@@ -1,5 +1,5 @@
 /* 
- * server.receiver -> server.js
+ * server.database -> server.js
  * ----------------------------------------------------------------------------------------------------
  * 
  * Author: Ronnie Smith <ras35@hw.ac.uk>
@@ -14,8 +14,8 @@
  */
 
 // Packages
-var app = require('express')();
-var http = require('http').Server(app);
+var express = require('express');
+var path = require('path');
 
 // MongoDB
 var dbName = "AR";
@@ -25,48 +25,47 @@ var db = require('mongodb').Db;
 var con_url = "mongodb://localhost:27017/" + dbName;
 
 /* 
- * Main Function
+ * Express
  * ----------------------------------------------------------------------------------------------------
  */
 
-runProcessor();
+var app = express();
+var http = require('http').Server(app);
+app.use(express.static(path.join(__dirname, 'public')));
 
-function runProcessor(){}
-setInterval(processor, 1000);
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
 
-function processor(){
-var latestReading = getLatestBeaconReading();
-console.log(latestReading);
-}
+http.listen(3001, function(){
+  console.log('listening on *:3001');
+});
 
 /* 
  * DB Manipulation Functions  
  * ----------------------------------------------------------------------------------------------------
  */
 
-function getAllBeaconReadings(){
+function addBeaconRSSIReadingToDB(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-        db.collection("Beacon_RSSI_Readings").find().toArray(function(err, docs) {
-            console.log(JSON.stringify(docs));
+        db.collection("Beacon_RSSI_Readings").insert(data, function(err, res) {
+            if (err) throw err;
+            console.log("Added 1 object to Beacon_RSSI_Readings collection.");
             db.close();
         });
     });
 
 }
 
-function getLatestBeaconReading(){
+function retrieveFromDBTest(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-        var latestReading = db.collection("Beacon_RSSI_Readings").find().limit(1).sort({$natural:-1});
-
-        latestReading.toArray(function(err, results) {
-            if (err) throw err;
-            console.log('%j', results);
+        db.collection("Beacon_RSSI_Readings").find().toArray(function(err, docs) {
+            console.log(JSON.stringify(docs));
             db.close();
-            return results;
         });
     });
 
