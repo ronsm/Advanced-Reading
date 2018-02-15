@@ -35,8 +35,8 @@ function runProcessor(){}
 setInterval(processor, 1000);
 
 function processor(){
-var latestReading = getLatestBeaconReading();
-console.log(latestReading);
+    var latestReading = getLatestBeaconReading();
+    console.log(latestReading);
 }
 
 /* 
