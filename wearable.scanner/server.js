@@ -22,16 +22,6 @@ const BeaconScanner = require('node-beacon-scanner');
 const scanner = new BeaconScanner();
 
 /* 
- * Socket.io
- * ----------------------------------------------------------------------------------------------------
- */
-
-// socket.on('connect', function (socket) {
-//     console.log('Connected!');
-// });
-// socket.emit('new data', '{ "objectType":"beacon_rssi", "beacons_in_range":5 }');
-
-/* 
  * Beacon Scanner
  * ----------------------------------------------------------------------------------------------------
  */
