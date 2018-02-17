@@ -50,18 +50,9 @@ io.on('connection', function(socket){
 
 io.on('connection', function(socket){
     socket.on('new data', function(msg){
-        console.log('received: ' + msg);
-        parsedJSON = JSON.parse(msg);
-        objectType = parsedJSON.objectType;
-
-        if(objectType.toString() == "beacon_rssi"){
-            console.log(objectType);
-            addBeaconRSSIReadingToDB(parsedJSON);
-            retrieveFromDBTest();
-        }
-        else{
-            console.error("Invalid object type!");
-        }
+        console.log(JSON.stringify(msg, null, '  '));
+        addBeaconRSSIReadingToDB(msg);
+        //retrieveFromDBTest();
     });
 });
 
@@ -77,9 +68,9 @@ function addBeaconRSSIReadingToDB(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-        db.collection("Beacon_RSSI_Readings").insert(data, function(err, res) {
+        db.collection("Beacon_RSSI_Readings_2").insert(data, function(err, res) {
             if (err) throw err;
-            console.log("Added 1 object to Beacon_RSSI_Readings collection.");
+            console.log("Added 1 object to Beacon_RSSI_Readings_2 collection.");
             db.close();
         });
     });
@@ -90,7 +81,7 @@ function retrieveFromDBTest(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-        db.collection("Beacon_RSSI_Readings").find().toArray(function(err, docs) {
+        db.collection("Beacon_RSSI_Readings_2").find().toArray(function(err, docs) {
             console.log(JSON.stringify(docs));
             db.close();
         });
