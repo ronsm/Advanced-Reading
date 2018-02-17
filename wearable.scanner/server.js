@@ -26,15 +26,20 @@ const scanner = new BeaconScanner();
  * ----------------------------------------------------------------------------------------------------
  */
 
-setInterval(scanControl, 1000);
+setInterval(scanControl, 500);
 
-scanner.onadvertisement = (ad) => {
-    //console.log(JSON.stringify(ad, null, '  '));
-    socket.emit('new data', ad);
-};
+// scanner.onadvertisement = (ad) => {
+//     //console.log(JSON.stringify(ad, null, '  '));
+//     socket.emit('new data', ad);
+// };
   
 function scanControl(){
     scanner.startScan();
+    scanner.onadvertisement = (ad) => {
+        //console.log(JSON.stringify(ad, null, '  '));
+        socket.emit('new data', ad);
+        scanner.stopScan();
+    };
 }
 
 scanner.startScan().then(() => {

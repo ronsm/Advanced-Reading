@@ -50,14 +50,16 @@ io.on('connection', function(socket){
 
 io.on('connection', function(socket){
     socket.on('new data', function(msg){
-        console.log(JSON.stringify(msg, null, '  '));
-        addBeaconRSSIReadingToDB(msg);
+        //console.log(JSON.stringify(msg, null, '  '));
+        if(msg.iBeacon.uuid == "B9407F30-F5F8-466E-AFF9-25556B57FE6D"){
+            addBeaconRSSIReadingToDB(msg);
+            //var dist = calculateDistance(msg.rssi);
+            //console.log(dist);
+            console.log(JSON.stringify(msg, null, '  '));
+        }
         //retrieveFromDBTest();
     });
 });
-
-// Example of valid JSON
-// { "objectType":"beacon_rssi", "beacons_in_range":5 }
 
 /* 
  * DB Manipulation Functions  
