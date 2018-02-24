@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.16.2",
     "http": "0.0.0",
+    "kalmanjs": "^1.0.0-beta",
     "mongodb": "^2.2.34"
   }
 }
