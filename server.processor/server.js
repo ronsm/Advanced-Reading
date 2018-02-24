@@ -74,6 +74,11 @@ function getEstimatedDistanceFromBeacon(beaconId, filter){
     
         console.log(averageRssi);
 
+        //var dist = calculateDistance(-40);
+        var dist = calculateDistance(averageRssi);
+
+        console.log('Distance: ' + dist);
+
     });
 
 }
@@ -130,20 +135,19 @@ function kalmanFilterReadings(noisyData){
 
 function calculateDistance(rssi) {
 
+    // Implementing distance caluclation as per this paper:
+    // https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
+
     var txPower = -59;
+    var N = 2.5;
+    var distance = -1.0;
 
     if (rssi == 0){
-        return -1.0;
-    }
-
-    var ratio = (rssi * 1.0) / txPower;
-
-    if (ratio < 1.0){
-        return Math.pow(ratio, 10);
-    }
-    else{
-        var distance =  ((0.89976) * Math.pow(ratio, 7.7095)) + 0.111;
         return distance;
     }
 
+    var power = (txPower - rssi) / (10 * N);
+    distance = Math.pow(10, power);
+
+    return distance;
 } 
