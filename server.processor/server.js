@@ -39,8 +39,10 @@ function runProcessor(){}
 setInterval(processor, 1000);
 
 function processor(){
-    var latestReading = getEstimatedDistanceFromBeacon(1, true);
+    //var latestReading = getEstimatedDistanceFromBeacon(1, true);
     //console.log(latestReading);
+
+    calculateDistanceZone3(1);
 }
 
 /* 
@@ -74,7 +76,7 @@ function getEstimatedDistanceFromBeacon(beaconId, filter){
     
         console.log(averageRssi);
 
-        //var dist = calculateDistance(-40);
+        //var dist = calculateDistance(-60);
         var dist = calculateDistance(averageRssi);
 
         console.log('Distance: ' + dist);
@@ -138,7 +140,8 @@ function calculateDistance(rssi) {
     // Implementing distance caluclation as per this paper:
     // https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
 
-    var txPower = -59;
+    // -55dB measured 1 metre away from Bluno Beetle
+    var txPower = -52;
     var N = 2.5;
     var distance = -1.0;
 
@@ -150,4 +153,36 @@ function calculateDistance(rssi) {
     distance = Math.pow(10, power);
 
     return distance;
-} 
+}
+
+function calculateDistanceZone3(zone) {
+
+    var rssiVals = [56, 52, 52];
+    var distVals = [0, 0, 0];
+
+    for(var i = 0; i < 3; i++){
+        distVals[i] = calculateDistance(rssiVals[i]);
+    }
+
+    trilaterateZone3(1, distVals[0], distVals[1], distVals[2])
+
+}
+
+function trilaterateZone3(zone, d1, d2, d3){
+
+    u = 2.5;
+    v = 2;
+
+    numerator_x = Math.pow(u, 2) + (Math.pow(d1, 2) - Math.pow(d2, 2));
+    denominator_x = 2 * u;
+
+    x = numerator_x / denominator_x;
+    
+    numerator_y = Math.pow(v, 2) + (Math.pow(d1, 2) - Math.pow(d3, 2));
+    denominator_y = 2 * v;
+
+    y = numerator_y / denominator_y;
+
+    console.log('x: ' + x + ' y: ' + y);
+
+}
