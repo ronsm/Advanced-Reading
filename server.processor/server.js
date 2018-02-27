@@ -29,6 +29,93 @@ var db = require('mongodb').Db;
 var con_url = "mongodb://localhost:27017/" + dbName;
 
 /* 
+ * JSON
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+const zone1 = {
+    "_id" : ObjectId("5a954f24ed0b1064d1cc513b"),
+    "zone" : 1,
+    "zoneName" : "kitchen",
+    "x" : 3.825,
+    "y" : 4.213,
+    "maxDistance" : 5.69,
+    "beaconPos" : [ 
+        true, 
+        true, 
+        true, 
+        false
+    ],
+    "beaconMajor" : 1,
+    "beaconMinors" : [ 
+        1, 
+        2, 
+        3
+    ]
+}
+
+const zone2 = {
+    "_id" : ObjectId("5a954f69ed0b1064d1cc514d"),
+    "zone" : 2,
+    "zoneName" : "lounge",
+    "x" : 3.825,
+    "y" : 3.787,
+    "maxDistance" : 5.38,
+    "beaconPos" : [ 
+        false, 
+        true, 
+        true, 
+        true
+    ],
+    "beaconMajor" : 1,
+    "beaconMinors" : [ 
+        3, 
+        4, 
+        5
+    ]
+}
+
+const zone3 = {
+    "_id" : ObjectId("5a954f81ed0b1064d1cc5157"),
+    "zone" : 3,
+    "zoneName" : "bedroom",
+    "x" : 3.139,
+    "y" : 3.787,
+    "maxDistance" : 4.92,
+    "beaconPos" : [ 
+        true, 
+        false, 
+        true, 
+        true
+    ],
+    "beaconMajor" : 1,
+    "beaconMinors" : [ 
+        6, 
+        7, 
+        8
+    ]
+}
+
+const zone4 = {
+    "_id" : ObjectId("5a954f9eed0b1064d1cc515e"),
+    "zone" : 4,
+    "zoneName" : "bathroom",
+    "x" : 3.139,
+    "y" : 2.77,
+    "maxDistance" : 4.19,
+    "beaconPos" : [ 
+        true, 
+        false, 
+        false, 
+        false
+    ],
+    "beaconMajor" : 1,
+    "beaconMinors" : [ 
+        9
+    ]
+}
+
+/* 
  * Main Function
  * ----------------------------------------------------------------------------------------------------
  */
@@ -135,7 +222,6 @@ function kalmanFilterReadings(noisyData){
  * ----------------------------------------------------------------------------------------------------
  */
 
-
 // Implementing distance caluclation as per this paper:
 // https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
 function calculateDistance(rssi) {
@@ -172,8 +258,8 @@ function calculateDistanceZone3(zone) {
 // Implementing trilateration with 3 beacons using basic geometry
 function trilaterateZone3(zone, d1, d2, d3){
 
-    u = 2.5;
-    v = 2;
+    u = zone.x;
+    v = zone.y;
 
     numerator_x = Math.pow(u, 2) + (Math.pow(d1, 2) - Math.pow(d2, 2));
     denominator_x = 2 * u;
@@ -186,5 +272,47 @@ function trilaterateZone3(zone, d1, d2, d3){
     y = numerator_y / denominator_y;
 
     console.log('x: ' + x + ' y: ' + y);
+
+}
+
+function zoneEstimation(beaconDistances){
+
+    var sortedBeaconDistances = beaconDistances.items.sort(function(a, b) {return a.distance - b.distance});
+
+    var c1 = 0;
+    for(var i = 0; i < 3; i++){
+        if(sortedBeaconDistances[i] < zone1.maxDistance)
+        c1 = c1++;
+    }
+
+    var c2 = 0;
+    for(var i = 2; i < 5; i++){
+        if(sortedBeaconDistances[i] < zone2.maxDistance)
+        c2 = c2++;
+    }
+
+    var c3 = 0;
+    for(var i = 5; i < 8; i++){
+        if(sortedBeaconDistances[i] < zone3.maxDistance)
+        c3 = c3++;
+    }
+
+    var nearestZone = -1;
+
+    if(c1 >= 2){
+        nearestZone = 1;
+    }
+
+    if(c2 >= 2){
+        nearestZone = 2;
+    }
+
+    if(c3 >= 2){
+        nearestZone = 3;
+    }
+
+    if(sortedBeaconDistances[0].minor == 9){
+        nearestZone = 4;
+    }
 
 }
