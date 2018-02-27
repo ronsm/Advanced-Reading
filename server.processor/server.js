@@ -135,10 +135,10 @@ function kalmanFilterReadings(noisyData){
  * ----------------------------------------------------------------------------------------------------
  */
 
-function calculateDistance(rssi) {
 
-    // Implementing distance caluclation as per this paper:
-    // https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
+// Implementing distance caluclation as per this paper:
+// https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
+function calculateDistance(rssi) {
 
     // -55dB measured 1 metre away from Bluno Beetle
     var txPower = -52;
@@ -155,6 +155,7 @@ function calculateDistance(rssi) {
     return distance;
 }
 
+// Conduct distance calculate for all beacons in zone
 function calculateDistanceZone3(zone) {
 
     var rssiVals = [56, 52, 52];
@@ -168,6 +169,7 @@ function calculateDistanceZone3(zone) {
 
 }
 
+// Implementing trilateration with 3 beacons using basic geometry
 function trilaterateZone3(zone, d1, d2, d3){
 
     u = 2.5;
