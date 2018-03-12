@@ -138,6 +138,15 @@ const zone5 = {
     ]
 }
 
+const positionStore = {
+    "x" : 6.964,
+    "y" : 8.0,
+    "timestamp" : 0
+}
+
+const globalX = 0.0;
+const globalY = 0.0;
+
 /* 
  * Main Function
  * ----------------------------------------------------------------------------------------------------
@@ -210,6 +219,19 @@ function getLatestBeaconReading(filter, callback){
 
             callback(results);
 
+        });
+    });
+
+}
+
+function addPositionToDB(data){
+
+    mongoClient.connect(con_url, function(err, db){
+        if(err) throw err;
+        db.collection("Beacon_Estimated_Positions").insert(data, function(err, res) {
+            if (err) throw err;
+            console.log("Added 1 object to Beacon_Estimated_Positions collection.");
+            db.close();
         });
     });
 
@@ -375,5 +397,35 @@ function zoneEstimation(beaconDistances){
     if(sortedBeaconDistances[0].minor == 9){
         nearestZone = 4;
     }
+
+}
+
+function localToGlobalSpace(zone, localPosition) {
+
+    var globalPosition = positionStore;
+
+    if(zone == 1){
+        globalPosition.x = globalX - localPosition.x;
+        globalPosition.y = globalY - localPosition.y;
+    }
+    if(zone == 2){
+        globalPosition.x = globalX - localPosition.y;
+        globalPosition.y = localPosition.x;
+    }
+    if(zone == 3){
+        globalPosition.x = localPosition.x;
+        globalPosition.y = localPosition.y;
+    }
+    if(zone == 4){
+        // Centre of the room
+        globalPosition.x = 0.5 * zone4.x;
+        globalPosition.y = 0.5 * zone4.y;
+    }
+
+    globalPosition.timestamp = Date.now();
+
+    addPositionToDB(globalPosition);
+
+    return globalPosition;
 
 }
