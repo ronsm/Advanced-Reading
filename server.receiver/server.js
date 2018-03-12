@@ -50,11 +50,12 @@ io.on('connection', function(socket){
 
 io.on('connection', function(socket){
     socket.on('new data', function(msg){
-        //console.log(JSON.stringify(msg, null, '  '));
-        if(msg.iBeacon.uuid == "B9407F30-F5F8-466E-AFF9-25556B57FE6D"){
-            addBeaconRSSIReadingToDB(msg);
-            console.log(JSON.stringify(msg, null, '  '));
-        }
+        console.log(JSON.stringify(msg, null, '  '));
+        addBeaconRSSIReadingToDB(msg);
+        // if(msg.iBeacon.major == 0){
+        //     //addBeaconRSSIReadingToDB(msg);
+        //     console.log(JSON.stringify(msg, null, '  '));
+        // }
         //retrieveFromDBTest();
     });
 });
@@ -68,9 +69,9 @@ function addBeaconRSSIReadingToDB(data){
 
     mongoClient.connect(con_url, function(err, db){
         if(err) throw err;
-        db.collection("Beacon_RSSI_Readings_2").insert(data, function(err, res) {
+        db.collection("Beacon_RSSI_Readings_3").insert(data, function(err, res) {
             if (err) throw err;
-            console.log("Added 1 object to Beacon_RSSI_Readings_2 collection.");
+            console.log("Added 1 object to Beacon_RSSI_Readings_3 collection.");
             db.close();
         });
     });

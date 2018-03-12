@@ -28,13 +28,19 @@ var mongoClient = require('mongodb').MongoClient;
 var db = require('mongodb').Db;
 var con_url = "mongodb://localhost:27017/" + dbName;
 
+// Beacon Data Temp Storage
+const numBeacons = 9;
+
 /* 
  * JSON
  * ----------------------------------------------------------------------------------------------------
  */
 
+const beaconObject = {
+    "beacons" : []
+}
+
 const zone1 = {
-    "_id" : ObjectId("5a954f24ed0b1064d1cc513b"),
     "zone" : 1,
     "zoneName" : "kitchen",
     "x" : 3.825,
@@ -55,7 +61,6 @@ const zone1 = {
 }
 
 const zone2 = {
-    "_id" : ObjectId("5a954f69ed0b1064d1cc514d"),
     "zone" : 2,
     "zoneName" : "lounge",
     "x" : 3.825,
@@ -76,7 +81,6 @@ const zone2 = {
 }
 
 const zone3 = {
-    "_id" : ObjectId("5a954f81ed0b1064d1cc5157"),
     "zone" : 3,
     "zoneName" : "bedroom",
     "x" : 3.139,
@@ -97,7 +101,6 @@ const zone3 = {
 }
 
 const zone4 = {
-    "_id" : ObjectId("5a954f9eed0b1064d1cc515e"),
     "zone" : 4,
     "zoneName" : "bathroom",
     "x" : 3.139,
@@ -115,6 +118,26 @@ const zone4 = {
     ]
 }
 
+const zone5 = {
+    "zone" : 4,
+    "zoneName" : "bathroom",
+    "x" : 1.80,
+    "y" : 1.76,
+    "maxDistance" : 2.51,
+    "beaconPos" : [ 
+        true, 
+        false, 
+        true, 
+        true
+    ],
+    "beaconMajor" : 1,
+    "beaconMinors" : [ 
+        1,
+        2,
+        3
+    ]
+}
+
 /* 
  * Main Function
  * ----------------------------------------------------------------------------------------------------
@@ -129,7 +152,11 @@ function processor(){
     //var latestReading = getEstimatedDistanceFromBeacon(1, true);
     //console.log(latestReading);
 
-    calculateDistanceZone3(1);
+    getLatestBeaconReading(true, function(results){
+        console.log(results);
+        calculateDistanceZone3(5);
+    });
+
 }
 
 /* 
@@ -149,6 +176,87 @@ function getAllBeaconReadings(){
 
 }
 
+function getLatestBeaconReading(filter, callback){
+
+    mongoClient.connect(con_url, function(err, db){
+        if(err) throw err;
+        //var latestReading = db.collection("Beacon_RSSI_Readings_2").find().limit(10).sort({$natural:-1});
+
+        var latestReadings = db.collection("Beacon_RSSI_Readings_3").find({}).sort({ $natural: -1 }).limit(10);
+
+        latestReadings = latestReadings.toArray(function(err, results) {
+            if (err) throw err;
+            //console.log(JSON.stringify(results, null, '  '));
+            db.close();
+
+            for(var i = 0; i < numBeacons; i++){
+                var simpleResults = [];
+                for(var j = 0; j < 10; j++){
+                    simpleResults[j] = results[j].beacons[i].rssi;
+                }
+                beaconObject.beacons[i] = simpleResults;
+            }
+
+            if(filter){
+                for(var i = 0; i < numBeacons; i++){
+                    beaconObject.beacons[i] = kalmanFilterReadings(beaconObject.beacons[i]);
+                }
+                //results = kalmanFilterReadings(results);
+            }
+
+            results = beaconObject;
+
+            //console.log(results);
+
+            callback(results);
+
+        });
+    });
+
+}
+
+/* 
+ * Calculation Functions
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+// Implementing distance caluclation as per this paper:
+// https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
+function calculateDistance(rssi) {
+
+    // txPower measured 1 metre away from Bluno Beetle
+    // Values by sampling device:
+    // iPhone X:    -54
+    // Pi Zero W:   -57
+    var txPower = -57;
+    var N = 2.0;
+    var distance = -1.0;
+
+    if (rssi == 0){
+        return distance;
+    }
+
+    var power = (txPower - rssi) / (10 * N);
+    //distance = Math.pow(10, power);
+
+    // d = d0 * exp(power)
+    // As d0 = 1m and we are measuring in metres, the multiplier is excluded
+    distance = Math.exp(power);
+    
+    return distance;
+}
+
+function kalmanFilterReadings(noisyData){
+    var kalmanFilter = new KalmanFilter({R: 0.01, Q: 3});
+    
+    var kalmanData = noisyData.map(function(v) {
+        return kalmanFilter.filter(v);
+    });
+
+    return kalmanData;
+}
+
+
 function getEstimatedDistanceFromBeacon(beaconId, filter){
 
     getLatestBeaconReading(filter, function(results) {
@@ -163,7 +271,6 @@ function getEstimatedDistanceFromBeacon(beaconId, filter){
     
         console.log(averageRssi);
 
-        //var dist = calculateDistance(-60);
         var dist = calculateDistance(averageRssi);
 
         console.log('Distance: ' + dist);
@@ -172,86 +279,40 @@ function getEstimatedDistanceFromBeacon(beaconId, filter){
 
 }
 
-function getLatestBeaconReading(filter, callback){
+function averageArray(arr){
 
-    mongoClient.connect(con_url, function(err, db){
-        if(err) throw err;
-        //var latestReading = db.collection("Beacon_RSSI_Readings_2").find().limit(10).sort({$natural:-1});
+    var averageVal = 0;
 
-        var latestReadings = db.collection("Beacon_RSSI_Readings_2").find({}, { _id: 0, rssi: 1 }).sort({ $natural: -1 }).limit(10);
-
-        latestReadings = latestReadings.toArray(function(err, results) {
-            if (err) throw err;
-            console.log('%j', results);
-            db.close();
-
-            var simpleResults = [];
-            for(var i = 0; i < 10; i++){
-                simpleResults[i] = results[i].rssi;
-            }
-
-            results = simpleResults;
-
-            console.log(results);
-
-            if(filter){
-                results = kalmanFilterReadings(results);
-            }
-
-            console.log(results);
-
-            callback(results);
-
-        });
-    });
-
-}
-
-function kalmanFilterReadings(noisyData){
-    var kalmanFilter = new KalmanFilter({R: 0.01, Q: 3});
-    
-    var kalmanData = noisyData.map(function(v) {
-        return kalmanFilter.filter(v);
-    });
-
-    return kalmanData;
-}
-
-/* 
- * Calculation Functions
- * ----------------------------------------------------------------------------------------------------
- */
-
-// Implementing distance caluclation as per this paper:
-// https://www.rn.inf.tu-dresden.de/dargie/papers/icwcuca.pdf
-function calculateDistance(rssi) {
-
-    // -55dB measured 1 metre away from Bluno Beetle
-    var txPower = -52;
-    var N = 2.5;
-    var distance = -1.0;
-
-    if (rssi == 0){
-        return distance;
+    var sum = 0;
+    for(var i = 0; i < 10; i++){
+        sum = sum + Math.abs(arr[i]);
     }
 
-    var power = (txPower - rssi) / (10 * N);
-    distance = Math.pow(10, power);
+    averageVal = sum / 10;
 
-    return distance;
+    return averageVal;
+
 }
 
-// Conduct distance calculate for all beacons in zone
+// Conduct distance calculation for all beacons in zone
 function calculateDistanceZone3(zone) {
 
-    var rssiVals = [56, 52, 52];
+    var rssiVals = [0, 0, 0];
+    if(zone == 5){
+        rssiVals[0] = -1 * averageArray(beaconObject.beacons[1]);
+        rssiVals[1] = -1 * averageArray(beaconObject.beacons[2]);
+        rssiVals[2] = -1 * averageArray(beaconObject.beacons[3]);
+        console.log('Average values: ' + rssiVals[0] + ', ' + rssiVals[1] + ', ' + rssiVals[2])
+    }
+
     var distVals = [0, 0, 0];
 
     for(var i = 0; i < 3; i++){
         distVals[i] = calculateDistance(rssiVals[i]);
+        console.log('Round: ' + i + ', Values: ' + distVals);
     }
 
-    trilaterateZone3(1, distVals[0], distVals[1], distVals[2])
+    trilaterateZone3(zone5, distVals[0], distVals[1], distVals[2])
 
 }
 
