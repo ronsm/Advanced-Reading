@@ -313,6 +313,31 @@ function calculateDistanceZone3(zone) {
 
 }
 
+function calculateAllDistances(zone) {
+
+    var rssiVals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    rssiVals[0] = -1 * averageArray(beaconObject.beacons[1]);
+    rssiVals[1] = -1 * averageArray(beaconObject.beacons[2]);
+    rssiVals[2] = -1 * averageArray(beaconObject.beacons[3]);
+    rssiVals[3] = -1 * averageArray(beaconObject.beacons[4]);
+    rssiVals[4] = -1 * averageArray(beaconObject.beacons[5]);
+    rssiVals[5] = -1 * averageArray(beaconObject.beacons[6]);
+    rssiVals[6] = -1 * averageArray(beaconObject.beacons[7]);
+    rssiVals[7] = -1 * averageArray(beaconObject.beacons[8]);
+    rssiVals[8] = -1 * averageArray(beaconObject.beacons[9]);
+
+    var distVals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    for(var i = 0; i < 9; i++){
+        distVals[i] = calculateDistance(rssiVals[i]);
+        console.log('Round: ' + i + ', Values: ' + distVals);
+    }
+
+    zoneEstimation(distVals);
+
+}
+
 // Implementing trilateration with 3 beacons using basic geometry
 function trilaterateZone3(zone, d1, d2, d3){
 
@@ -371,6 +396,19 @@ function zoneEstimation(beaconDistances){
 
     if(sortedBeaconDistances[0].minor == 9){
         nearestZone = 4;
+    }
+
+    if(nearestZone == 1){
+        trilaterateZone3(1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
+    }
+    if(nearestZone == 2){
+        trilaterateZone3(1, beaconDistances[3], beaconDistances[2], beaconDistances[4]);
+    }
+    if(nearestZone == 3){
+        trilaterateZone3(1, beaconDistances[6], beaconDistances[5], beaconDistances[7]);
+    }
+    if(nearestZone == 5){
+        console.log('Zone 4');
     }
 
 }
