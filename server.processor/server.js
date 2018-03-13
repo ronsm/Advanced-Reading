@@ -158,8 +158,6 @@ function runProcessor(){}
 setInterval(processor, 1000);
 
 function processor(){
-    //var latestReading = getEstimatedDistanceFromBeacon(1, true);
-    //console.log(latestReading);
 
     getLatestBeaconReading(true, function(results){
         console.log(results);
@@ -276,29 +274,6 @@ function kalmanFilterReadings(noisyData){
     });
 
     return kalmanData;
-}
-
-
-function getEstimatedDistanceFromBeacon(beaconId, filter){
-
-    getLatestBeaconReading(filter, function(results) {
-        var averageRssi = 0;
-
-        var sum = 0;
-        for(var i = 0; i < 10; i++){
-            sum = sum + Math.abs(results[i]);
-        }
-
-        averageRssi = sum / 10;
-    
-        console.log(averageRssi);
-
-        var dist = calculateDistance(averageRssi);
-
-        console.log('Distance: ' + dist);
-
-    });
-
 }
 
 function averageArray(arr){
