@@ -383,42 +383,6 @@ function zoneEstimation(beaconDistances){
 
     console.log(sortedBeaconDistances);
 
-    // var c1 = 0;
-    // for(var i = 0; i < 3; i++){
-    //     if(sortedBeaconDistances[i] < zone1.maxDistance)
-    //     c1 = c1++;
-    // }
-
-    // var c2 = 0;
-    // for(var i = 2; i < 5; i++){
-    //     if(sortedBeaconDistances[i] < zone2.maxDistance)
-    //     c2 = c2++;
-    // }
-
-    // var c3 = 0;
-    // for(var i = 5; i < 8; i++){
-    //     if(sortedBeaconDistances[i] < zone3.maxDistance)
-    //     c3 = c3++;
-    // }
-
-    // var nearestZone = -1;
-
-    // if(c1 >= 2){
-    //     nearestZone = 1;
-    // }
-
-    // if(c2 >= 2){
-    //     nearestZone = 2;
-    // }
-
-    // if(c3 >= 2){
-    //     nearestZone = 3;
-    // }
-
-    // if(sortedBeaconDistances[0].minor == 9){
-    //     nearestZone = 4;
-    // }
-
     if(nearestZone == 1){
         trilaterateZone3(1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
         console.log('Zone 1');
