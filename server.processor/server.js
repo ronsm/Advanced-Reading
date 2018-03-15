@@ -161,7 +161,8 @@ function processor(){
 
     getLatestBeaconReading(true, function(results){
         console.log(results);
-        calculateDistanceZone3(5);
+        //calculateDistanceZone3(5);
+        calculateAllDistances();
     });
 
 }
@@ -252,6 +253,10 @@ function calculateDistance(rssi) {
     // d = d0 * exp(power)
     // As d0 = 1m and we are measuring in metres, the multiplier is excluded
     distance = Math.exp(power);
+
+    if(distance == 0 || distance > 20){
+        distance = 20;
+    }
     
     return distance;
 }
@@ -260,15 +265,17 @@ function calculateAllDistances(zone) {
 
     var rssiVals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    rssiVals[0] = -1 * averageArray(beaconObject.beacons[1]);
-    rssiVals[1] = -1 * averageArray(beaconObject.beacons[2]);
-    rssiVals[2] = -1 * averageArray(beaconObject.beacons[3]);
-    rssiVals[3] = -1 * averageArray(beaconObject.beacons[4]);
-    rssiVals[4] = -1 * averageArray(beaconObject.beacons[5]);
-    rssiVals[5] = -1 * averageArray(beaconObject.beacons[6]);
-    rssiVals[6] = -1 * averageArray(beaconObject.beacons[7]);
-    rssiVals[7] = -1 * averageArray(beaconObject.beacons[8]);
-    rssiVals[8] = -1 * averageArray(beaconObject.beacons[9]);
+    //console.log(beaconObject.beacons);
+
+    rssiVals[0] = -1 * averageArray(beaconObject.beacons[0]);
+    rssiVals[1] = -1 * averageArray(beaconObject.beacons[1]);
+    rssiVals[2] = -1 * averageArray(beaconObject.beacons[2]);
+    rssiVals[3] = -1 * averageArray(beaconObject.beacons[3]);
+    rssiVals[4] = -1 * averageArray(beaconObject.beacons[4]);
+    rssiVals[5] = -1 * averageArray(beaconObject.beacons[5]);
+    rssiVals[6] = -1 * averageArray(beaconObject.beacons[6]);
+    rssiVals[7] = -1 * averageArray(beaconObject.beacons[7]);
+    rssiVals[8] = -1 * averageArray(beaconObject.beacons[8]);
 
     var distVals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -310,55 +317,125 @@ function calculateDistanceZone3(zone) {
 
 function zoneEstimation(beaconDistances){
 
-    var sortedBeaconDistances = beaconDistances.items.sort(function(a, b) {return a.distance - b.distance});
+    //var beaconDistancesJSON = JSON.stringify(beaconDistances);
 
-    var c1 = 0;
-    for(var i = 0; i < 3; i++){
-        if(sortedBeaconDistances[i] < zone1.maxDistance)
-        c1 = c1++;
+    var beaconDistancesObject = [
+        { "id" : 0, "zones" : [1], "distance" : beaconDistances[0]},
+        { "id" : 1, "zones" : [1], "distance" : beaconDistances[1]},
+        { "id" : 2, "zones" : [1, 2], "distance" : beaconDistances[2]},
+        { "id" : 3, "zones" : [2], "distance" : beaconDistances[3]},
+        { "id" : 4, "zones" : [2], "distance" : beaconDistances[4]},
+        { "id" : 5, "zones" : [3], "distance" : beaconDistances[5]},
+        { "id" : 6, "zones" : [3], "distance" : beaconDistances[6]},
+        { "id" : 7, "zones" : [3], "distance" : beaconDistances[7]},
+        { "id" : 8, "zones" : [4], "distance" : beaconDistances[8]},
+    ];
+
+    console.log(beaconDistances);
+    console.log(beaconDistancesObject);
+
+    //var sortedBeaconDistances = beaconDistancesObject.items.sort(function(a, b) {return a.distances - b.distances});
+
+    var sortedBeaconDistances = beaconDistancesObject.sort(function(a, b) {
+        return parseFloat(a.distance) - parseFloat(b.distance);
+    });
+
+    var firstGuess = sortedBeaconDistances[0].zones[0];
+    var secondGuess = sortedBeaconDistances[1].zones[0];
+
+    var firstGuessCorrect = false;
+    for(var i = 0; i < sortedBeaconDistances[0].zones.length; i++){
+        for(var j = 0; j < sortedBeaconDistances[1].zones.length; j++){
+            if(sortedBeaconDistances[1].zones[j] == firstGuess){
+                firstGuessCorrect = true;
+            }
+        }
+        for(var j = 0; j < sortedBeaconDistances[2].zones.length; j++){
+            if(sortedBeaconDistances[2].zones[j] == firstGuess){
+                firstGuessCorrect = true;
+            }
+        }
     }
 
-    var c2 = 0;
-    for(var i = 2; i < 5; i++){
-        if(sortedBeaconDistances[i] < zone2.maxDistance)
-        c2 = c2++;
+    if(firstGuess){
+        nearestZone = firstGuess;
     }
 
-    var c3 = 0;
-    for(var i = 5; i < 8; i++){
-        if(sortedBeaconDistances[i] < zone3.maxDistance)
-        c3 = c3++;
+    var secondGuessCorrect = false;
+    if(!firstGuess){
+        for(var i = 0; i < sortedBeaconDistances[1].zones.length; i++){
+            for(var j = 0; j < sortedBeaconDistances[2].zones.length; j++){
+                if(sortedBeaconDistances[2].zones[j] == firstGuess){
+                    secondGuessCorrect = true;
+                }
+            }
+            for(var j = 0; j < sortedBeaconDistances[3].zones.length; j++){
+                if(sortedBeaconDistances[3].zones[j] == firstGuess){
+                    secondGuessCorrect = true;
+                }
+            }
+        }
     }
 
-    var nearestZone = -1;
-
-    if(c1 >= 2){
-        nearestZone = 1;
+    if(secondGuess){
+        nearestZone = secondGuess;
     }
 
-    if(c2 >= 2){
-        nearestZone = 2;
-    }
+    console.log(sortedBeaconDistances);
 
-    if(c3 >= 2){
-        nearestZone = 3;
-    }
+    // var c1 = 0;
+    // for(var i = 0; i < 3; i++){
+    //     if(sortedBeaconDistances[i] < zone1.maxDistance)
+    //     c1 = c1++;
+    // }
 
-    if(sortedBeaconDistances[0].minor == 9){
-        nearestZone = 4;
-    }
+    // var c2 = 0;
+    // for(var i = 2; i < 5; i++){
+    //     if(sortedBeaconDistances[i] < zone2.maxDistance)
+    //     c2 = c2++;
+    // }
+
+    // var c3 = 0;
+    // for(var i = 5; i < 8; i++){
+    //     if(sortedBeaconDistances[i] < zone3.maxDistance)
+    //     c3 = c3++;
+    // }
+
+    // var nearestZone = -1;
+
+    // if(c1 >= 2){
+    //     nearestZone = 1;
+    // }
+
+    // if(c2 >= 2){
+    //     nearestZone = 2;
+    // }
+
+    // if(c3 >= 2){
+    //     nearestZone = 3;
+    // }
+
+    // if(sortedBeaconDistances[0].minor == 9){
+    //     nearestZone = 4;
+    // }
 
     if(nearestZone == 1){
         trilaterateZone3(1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
+        console.log('Zone 1');
     }
     if(nearestZone == 2){
         trilaterateZone3(1, beaconDistances[3], beaconDistances[2], beaconDistances[4]);
+        console.log('Zone 2');
     }
     if(nearestZone == 3){
         trilaterateZone3(1, beaconDistances[6], beaconDistances[5], beaconDistances[7]);
+        console.log('Zone 3');
+    }
+    if(nearestZone == 4){
+        console.log('Zone 4');
     }
     if(nearestZone == 5){
-        console.log('Zone 4');
+        console.log('Zone 5');
     }
 
 }
