@@ -381,18 +381,22 @@ function zoneEstimation(beaconDistances){
         nearestZone = secondGuess;
     }
 
+    if(!firstGuess && !secondGuess){
+        console.log('Unable to detect zone!');
+    }
+
     console.log(sortedBeaconDistances);
 
     if(nearestZone == 1){
-        trilaterateZone3(1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
+        trilaterateZone3(zone1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
         console.log('Zone 1');
     }
     if(nearestZone == 2){
-        trilaterateZone3(1, beaconDistances[3], beaconDistances[2], beaconDistances[4]);
+        trilaterateZone3(zone2, beaconDistances[3], beaconDistances[2], beaconDistances[4]);
         console.log('Zone 2');
     }
     if(nearestZone == 3){
-        trilaterateZone3(1, beaconDistances[6], beaconDistances[5], beaconDistances[7]);
+        trilaterateZone3(zone3, beaconDistances[6], beaconDistances[5], beaconDistances[7]);
         console.log('Zone 3');
     }
     if(nearestZone == 4){
