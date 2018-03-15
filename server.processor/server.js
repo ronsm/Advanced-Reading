@@ -167,21 +167,9 @@ function processor(){
 }
 
 /* 
- * DB Manipulation Functions  
+ * STEP 1
  * ----------------------------------------------------------------------------------------------------
  */
-
-function getAllBeaconReadings(){
-
-    mongoClient.connect(con_url, function(err, db){
-        if(err) throw err;
-        db.collection("Beacon_RSSI_Readings_2").find().toArray(function(err, docs) {
-            console.log(JSON.stringify(docs));
-            db.close();
-        });
-    });
-
-}
 
 function getLatestBeaconReading(filter, callback){
 
@@ -222,21 +210,23 @@ function getLatestBeaconReading(filter, callback){
 
 }
 
-function addPositionToDB(data){
+/* 
+ * STEP 2
+ * ----------------------------------------------------------------------------------------------------
+ */
 
-    mongoClient.connect(con_url, function(err, db){
-        if(err) throw err;
-        db.collection("Beacon_Estimated_Positions").insert(data, function(err, res) {
-            if (err) throw err;
-            console.log("Added 1 object to Beacon_Estimated_Positions collection.");
-            db.close();
-        });
+function kalmanFilterReadings(noisyData){
+    var kalmanFilter = new KalmanFilter({R: 0.01, Q: 3});
+    
+    var kalmanData = noisyData.map(function(v) {
+        return kalmanFilter.filter(v);
     });
 
+    return kalmanData;
 }
 
 /* 
- * Calculation Functions
+ * STEP 3
  * ----------------------------------------------------------------------------------------------------
  */
 
@@ -266,53 +256,6 @@ function calculateDistance(rssi) {
     return distance;
 }
 
-function kalmanFilterReadings(noisyData){
-    var kalmanFilter = new KalmanFilter({R: 0.01, Q: 3});
-    
-    var kalmanData = noisyData.map(function(v) {
-        return kalmanFilter.filter(v);
-    });
-
-    return kalmanData;
-}
-
-function averageArray(arr){
-
-    var averageVal = 0;
-
-    var sum = 0;
-    for(var i = 0; i < 10; i++){
-        sum = sum + Math.abs(arr[i]);
-    }
-
-    averageVal = sum / 10;
-
-    return averageVal;
-
-}
-
-// Conduct distance calculation for all beacons in zone
-function calculateDistanceZone3(zone) {
-
-    var rssiVals = [0, 0, 0];
-    if(zone == 5){
-        rssiVals[0] = -1 * averageArray(beaconObject.beacons[1]);
-        rssiVals[1] = -1 * averageArray(beaconObject.beacons[2]);
-        rssiVals[2] = -1 * averageArray(beaconObject.beacons[3]);
-        console.log('Average values: ' + rssiVals[0] + ', ' + rssiVals[1] + ', ' + rssiVals[2])
-    }
-
-    var distVals = [0, 0, 0];
-
-    for(var i = 0; i < 3; i++){
-        distVals[i] = calculateDistance(rssiVals[i]);
-        console.log('Round: ' + i + ', Values: ' + distVals);
-    }
-
-    trilaterateZone3(zone5, distVals[0], distVals[1], distVals[2])
-
-}
-
 function calculateAllDistances(zone) {
 
     var rssiVals = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -338,25 +281,32 @@ function calculateAllDistances(zone) {
 
 }
 
-// Implementing trilateration with 3 beacons using basic geometry
-function trilaterateZone3(zone, d1, d2, d3){
+// DEPRECATED
+function calculateDistanceZone3(zone) {
 
-    u = zone.x;
-    v = zone.y;
+    var rssiVals = [0, 0, 0];
+    if(zone == 5){
+        rssiVals[0] = -1 * averageArray(beaconObject.beacons[1]);
+        rssiVals[1] = -1 * averageArray(beaconObject.beacons[2]);
+        rssiVals[2] = -1 * averageArray(beaconObject.beacons[3]);
+        console.log('Average values: ' + rssiVals[0] + ', ' + rssiVals[1] + ', ' + rssiVals[2])
+    }
 
-    numerator_x = Math.pow(u, 2) + (Math.pow(d1, 2) - Math.pow(d2, 2));
-    denominator_x = 2 * u;
+    var distVals = [0, 0, 0];
 
-    x = numerator_x / denominator_x;
-    
-    numerator_y = Math.pow(v, 2) + (Math.pow(d1, 2) - Math.pow(d3, 2));
-    denominator_y = 2 * v;
+    for(var i = 0; i < 3; i++){
+        distVals[i] = calculateDistance(rssiVals[i]);
+        console.log('Round: ' + i + ', Values: ' + distVals);
+    }
 
-    y = numerator_y / denominator_y;
-
-    console.log('x: ' + x + ' y: ' + y);
+    trilaterateZone3(zone5, distVals[0], distVals[1], distVals[2])
 
 }
+
+/* 
+ * STEP 4
+ * ----------------------------------------------------------------------------------------------------
+ */
 
 function zoneEstimation(beaconDistances){
 
@@ -413,6 +363,36 @@ function zoneEstimation(beaconDistances){
 
 }
 
+/* 
+ * STEP 5
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+// Implementing trilateration with 3 beacons using basic geometry
+function trilaterateZone3(zone, d1, d2, d3){
+
+    u = zone.x;
+    v = zone.y;
+
+    numerator_x = Math.pow(u, 2) + (Math.pow(d1, 2) - Math.pow(d2, 2));
+    denominator_x = 2 * u;
+
+    x = numerator_x / denominator_x;
+    
+    numerator_y = Math.pow(v, 2) + (Math.pow(d1, 2) - Math.pow(d3, 2));
+    denominator_y = 2 * v;
+
+    y = numerator_y / denominator_y;
+
+    console.log('x: ' + x + ' y: ' + y);
+
+}
+
+/* 
+ * STEP 6
+ * ----------------------------------------------------------------------------------------------------
+ */
+
 function localToGlobalSpace(zone, localPosition) {
 
     var globalPosition = positionStore;
@@ -440,5 +420,55 @@ function localToGlobalSpace(zone, localPosition) {
     addPositionToDB(globalPosition);
 
     return globalPosition;
+
+}
+
+/* 
+ * STEP 7
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+function addPositionToDB(data){
+
+    mongoClient.connect(con_url, function(err, db){
+        if(err) throw err;
+        db.collection("Beacon_Estimated_Positions").insert(data, function(err, res) {
+            if (err) throw err;
+            console.log("Added 1 object to Beacon_Estimated_Positions collection.");
+            db.close();
+        });
+    });
+
+}
+
+/* 
+ * Assistive Functions
+ * ----------------------------------------------------------------------------------------------------
+ */
+
+function getAllBeaconReadings(){
+
+    mongoClient.connect(con_url, function(err, db){
+        if(err) throw err;
+        db.collection("Beacon_RSSI_Readings_2").find().toArray(function(err, docs) {
+            console.log(JSON.stringify(docs));
+            db.close();
+        });
+    });
+
+}
+
+function averageArray(arr){
+
+    var averageVal = 0;
+
+    var sum = 0;
+    for(var i = 0; i < 10; i++){
+        sum = sum + Math.abs(arr[i]);
+    }
+
+    averageVal = sum / 10;
+
+    return averageVal;
 
 }
