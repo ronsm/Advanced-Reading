@@ -16,6 +16,7 @@
 // Packages
 var express = require('express');
 var path = require('path');
+const router = express.Router()
 
 // MongoDB
 var dbName = "AR";
@@ -37,9 +38,14 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
+var IPSController = require('./routes/ips');
+app.use('/ips', IPSController);
+
 http.listen(3001, function(){
   console.log('listening on *:3001');
 });
+
+module.exports = app;
 
 /* 
  * DB Manipulation Functions  

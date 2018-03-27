@@ -239,7 +239,7 @@ function calculateDistance(rssi) {
     // Values by sampling device:
     // iPhone X:    -54
     // Pi Zero W:   -57
-    var txPower = -57;
+    var txPower = -49;
     var N = 2.0;
     var distance = -1.0;
 

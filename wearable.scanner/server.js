@@ -15,8 +15,8 @@
 
 // Packages
 var io = require('socket.io-client');
-var socket = io.connect('http://192.168.1.13:3000', {reconnect: true});
-//var socket = io.connect('http://172.20.10.2:3000', {reconnect: true});
+//var socket = io.connect('http://192.168.1.13:3000', {reconnect: true});
+var socket = io.connect('http://172.20.10.2:3000', {reconnect: true});
 //var socket = io.connect('http://localhost:3000', {reconnect: true});
 
 var noble = require('noble');
@@ -61,8 +61,8 @@ function initBeaconArray(){
 
 initBeaconArray();
 
-setInterval(scanControl, 100);
-setInterval(broadcastControl, 250);
+setInterval(scanControl, 25);
+setInterval(broadcastControl, 100);
   
 function scanControl(){
     scanner.startScan();

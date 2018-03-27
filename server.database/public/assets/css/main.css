@@ -20,6 +20,8 @@
 		vertical-align: baseline;
 	}
 
+	#mapid { height: 800px; }
+
 	article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 		display: block;
 	}

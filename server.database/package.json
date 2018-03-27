@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ronsm/Advanced-Reading#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "http": "0.0.0",
     "mongodb": "^2.2.34",
