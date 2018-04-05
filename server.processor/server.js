@@ -388,7 +388,7 @@ function zoneEstimation(beaconDistances){
     console.log(sortedBeaconDistances);
 
     if(nearestZone == 1){
-        trilaterateZone3(zone1, beaconDistances[1], beaconDistances[0], beaconDistances[2]);
+        trilaterateZone3(zone1, beaconDistances[0], beaconDistances[1], beaconDistances[2]);
         console.log('Zone 1');
     }
     if(nearestZone == 2){

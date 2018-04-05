@@ -31,6 +31,10 @@ const beaconObject = {
     "beacons" : []
 }
 
+const beaconObjectOld = {
+    "beacons" : []
+}
+
 const blankBeacon = {
     "id": "000000000000",
     "address": "00:00:00:00:00:00",
@@ -63,6 +67,7 @@ initBeaconArray();
 
 setInterval(scanControl, 25);
 setInterval(broadcastControl, 100);
+setInterval(clearBeacon, 5000);
   
 function scanControl(){
     scanner.startScan();
@@ -71,7 +76,6 @@ function scanControl(){
         ad.timestamp = Date.now();
         var pos = ad.iBeacon.minor;
         if(pos >= 0 && pos <= 9){
-            //if(pos == 2) console.log(ad.rssi);
             beaconObject.beacons[pos] = ad;
         }
         //scanner.stopScan();
@@ -88,4 +92,14 @@ function broadcastControl(){
     //console.log(beaconObject);
     console.log('Transmitted beacon array.');
     socket.emit('new data', beaconObject);
+}
+
+// If a beacon goes offline, clear old value after 5 seconds
+function clearBeacon(){
+    beaconObjectOld = beaconObject;
+    for(var i = 0; i < 9; i++){
+        if(beaconObject.beacons[i].timestamp == beaconObjectOld.beacons[i].timestamp){
+            beaconObject.beacons[i].iBeacon.rssi = -1000;
+        }
+    }
 }
