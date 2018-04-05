@@ -431,6 +431,13 @@ function trilaterateZone3(zone, d1, d2, d3){
 
     console.log('x: ' + x + ' y: ' + y);
 
+    var localPosition = positionStore;
+    localPosition.x = x;
+    localPosition.y = y;
+    localPosition.timestamp = 0;
+
+    localToGlobalSpace(zone, localPosition);
+
 }
 
 /* 
