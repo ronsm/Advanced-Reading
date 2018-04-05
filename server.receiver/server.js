@@ -52,11 +52,6 @@ io.on('connection', function(socket){
     socket.on('new data', function(msg){
         console.log(JSON.stringify(msg, null, '  '));
         addBeaconRSSIReadingToDB(msg);
-        // if(msg.iBeacon.major == 0){
-        //     //addBeaconRSSIReadingToDB(msg);
-        //     console.log(JSON.stringify(msg, null, '  '));
-        // }
-        //retrieveFromDBTest();
     });
 });
 
