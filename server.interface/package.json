@@ -1,5 +1,5 @@
 {
-  "name": "server.database",
+  "name": "server.interface",
   "version": "1.0.0",
   "description": "Database component of BLE positioning Server",
   "main": "server.js",

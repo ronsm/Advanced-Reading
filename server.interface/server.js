@@ -1,5 +1,5 @@
 /* 
- * server.database -> server.js
+ * server.interface -> server.js
  * ----------------------------------------------------------------------------------------------------
  * 
  * Author: Ronnie Smith <ras35@hw.ac.uk>

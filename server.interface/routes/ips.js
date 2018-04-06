@@ -1,5 +1,5 @@
 /* 
- * server.database -> routes -> ips.js
+ * server.interface -> routes -> ips.js
  * ----------------------------------------------------------------------------------------------------
  * 
  * Author: Ronnie Smith <ras35@hw.ac.uk>
