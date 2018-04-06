@@ -31,7 +31,7 @@ const beaconObject = {
     "beacons" : []
 }
 
-const beaconObjectOld = {
+var beaconObjectOld = {
     "beacons" : []
 }
 
@@ -65,8 +65,8 @@ function initBeaconArray(){
 
 initBeaconArray();
 
-setInterval(scanControl, 25);
-setInterval(broadcastControl, 100);
+setInterval(scanControl, 10);
+setInterval(broadcastControl, 25);
 setInterval(clearBeacon, 5000);
   
 function scanControl(){

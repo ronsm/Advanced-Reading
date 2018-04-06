@@ -155,7 +155,7 @@ const globalY = 0.0;
 runProcessor();
 
 function runProcessor(){}
-setInterval(processor, 1000);
+setInterval(processor, 100);
 
 function processor(){
 
@@ -239,8 +239,8 @@ function calculateDistance(rssi) {
     // Values by sampling device:
     // iPhone X:    -54
     // Pi Zero W:   -57
-    var txPower = -49;
-    var N = 2.0;
+    var txPower = -57;
+    var N = 2.5;
     var distance = -1.0;
 
     if (rssi == 0){
@@ -469,7 +469,10 @@ function localToGlobalSpace(zone, localPosition) {
 
     globalPosition.timestamp = Date.now();
 
-    addPositionToDB(globalPosition);
+    // setTimeout(function() {
+    //     addPositionToDB(globalPosition);
+    // }, 100)
+    //addPositionToDB(globalPosition);
 
     return globalPosition;
 
